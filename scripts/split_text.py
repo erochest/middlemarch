@@ -95,18 +95,27 @@ def locate_lines(lines):
     book = 1
     chapter = para = None
     loc = None
+    blank_line = False
 
     for line in lines:
         if book_start(line):
             book += 1
             chapter = para = None
+            blank_line = True
             loc = Location(book, chapter, para)
         elif chapter_start(line):
             chapter = 1 if chapter is None else chapter + 1
+            para = None
+            blank_line = True
             loc = Location(book, chapter, para)
         elif paragraph_start(line):
+            blank_line = True
+        elif blank_line and line.strip():
             para = 1 if para is None else para + 1
             loc = Location(book, chapter, para)
+            blank_line = False
+        elif line.strip():
+            blank_line = False
 
         if loc is not None:
             yield (loc, line)
@@ -115,6 +124,10 @@ def locate_lines(lines):
 def main():
     lines = read_book(TEXT)
     located = list(locate_lines(lines))
+
+    for dirname in (FULL, BOOKS, CHAPTERS, PARAS):
+        if not os.path.isdir(dirname):
+            os.makedirs(dirname)
 
     write_full(located, FULL)
 
