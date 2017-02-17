@@ -11,6 +11,7 @@ FULL = 'full'
 BOOKS = 'books'
 CHAPTERS = 'chapters'
 PARAS = 'paragraphs'
+CHUNKS = (FULL, BOOKS, CHAPTERS, PARAS)
 
 
 Location = namedtuple('Location', ('book', 'chapter', 'para'))
@@ -122,14 +123,14 @@ def locate_lines(lines):
 
 
 def main():
-    lines = read_book(TEXT)
+    lines = read_book(os.path.join(FULL, TEXT))
     located = list(locate_lines(lines))
 
     for dirname in (FULL, BOOKS, CHAPTERS, PARAS):
         if not os.path.isdir(dirname):
             os.makedirs(dirname)
 
-    write_full(located, FULL)
+    write_full(located, '.')
 
     for bn, book_lines in groupby(located, key=lambda p: p[0].book):
         if bn is None:
