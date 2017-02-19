@@ -15,7 +15,7 @@ from split_text import CHUNKS, corpus_files_contents, file_to_loc
 def collocates(items, spread=3, bidir=True):
     """Takes a list of items and yields pairs of items that are spread apart.
 
-    >>> list(collocates(range(10), 3))
+    >>> list(collocates(range(10), 3, False))
     [(0, 1), (0, 2), (0, 3), (1, 2), (1, 3), (1, 4), (2, 3), (2, 4), (2, 5), (3, 4), (3, 5), (3, 6), (4, 5), (4, 6), (4, 7), (5, 6), (5, 7), (5, 8), (6, 7), (6, 8), (6, 9), (7, 8), (7, 9), (8, 9)]
     """
     maximum = len(items)
