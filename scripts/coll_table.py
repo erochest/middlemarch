@@ -37,6 +37,7 @@ def collocates(items, spread=3, bidir=True):
 def main():
     for dirname in CHUNKS:
         files, content = corpus_files_contents(dirname)
+        headers = ['token'] + [file_to_loc(filename) for filename in files]
 
         counts = CountVectorizer()
         tokenizer = counts.build_analyzer()
@@ -58,7 +59,6 @@ def main():
             print('{} => {}'.format(dirname, output))
             with open(output, 'w') as fout:
                 writer = csv.writer(fout)
-                headers = ['token'] + [file_to_loc(filename) for filename in files]
                 writer.writerow(headers)
                 writer.writerows(
                     [word] + list(freqs[:, i])
