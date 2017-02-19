@@ -5,33 +5,16 @@
 
 
 import csv
-import glob
 import os
 
 from sklearn.feature_extraction.text import CountVectorizer
 
-import split_text
-
-
-def read_corpus(dirname):
-    """Read in a corpus and yield each document as a string."""
-    for filename in glob.glob(os.path.join(dirname, '*.txt')):
-        with open(filename) as fin:
-            yield (filename, fin.read().replace('_', ' '))
-
-
-def file_to_loc(filename):
-    """Extracts the location from a filename."""
-    return '.'.join(p.lstrip('0') for p in filename.split('.')[0].split('-')[1:])
+from split_text import CHUNKS, file_to_loc, corpus_files_contents
 
 
 def main():
-    for dirname in split_text.CHUNKS:
-        files = []
-        content = []
-        for filename, text in read_corpus(dirname):
-            files.append(filename)
-            content.append(text)
+    for dirname in CHUNKS:
+        files, content = corpus_files_contents(dirname)
 
         counts = CountVectorizer()
         freqs = counts.fit_transform(content).toarray()

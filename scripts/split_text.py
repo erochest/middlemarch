@@ -2,6 +2,7 @@
 
 
 from collections import namedtuple
+import glob
 from itertools import groupby
 import os
 
@@ -15,6 +16,29 @@ CHUNKS = (FULL, BOOKS, CHAPTERS, PARAS)
 
 
 Location = namedtuple('Location', ('book', 'chapter', 'para'))
+
+
+def read_corpus(dirname):
+    """Read in a corpus and yield each document as a string."""
+    for filename in glob.glob(os.path.join(dirname, '*.txt')):
+        with open(filename) as fin:
+            yield (filename, fin.read().replace('_', ' '))
+
+
+def file_to_loc(filename):
+    """Extracts the location from a filename."""
+    return '.'.join(p.lstrip('0') for p in filename.split('.')[0].split('-')[1:])
+
+
+def corpus_files_contents(dirname):
+    """Return a tuple listing the files in the corpus in the first element and
+    the contents of the corpus in the second."""
+    files = []
+    content = []
+    for filename, text in read_corpus(dirname):
+        files.append(filename)
+        content.append(text)
+    return (files, content)
 
 
 def format_loc(loc):
