@@ -9,7 +9,7 @@ import os
 
 from sklearn.feature_extraction.text import CountVectorizer
 
-from split_text import CHUNKS, file_to_loc, corpus_files_contents
+from split_text import CHUNKS, file_to_loc_str, corpus_files_contents
 
 
 def main():
@@ -23,7 +23,7 @@ def main():
         print('{} => {}'.format(dirname, output))
         with open(output, 'w') as fout:
             writer = csv.writer(fout)
-            headers = ['token'] + [file_to_loc(filename) for filename in files]
+            headers = ['token'] + [file_to_loc_str(filename) for filename in files]
             writer.writerow(headers)
             writer.writerows(
                 [name] + list(freqs[:, i])

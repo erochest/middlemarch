@@ -6,10 +6,15 @@
 
 from collections import defaultdict
 import csv
+import itertools
+import operator
 
 from sklearn.feature_extraction.text import CountVectorizer
 
-from split_text import CHUNKS, corpus_files_contents, file_to_loc
+from split_text import (
+        CHUNKS, corpus_files_contents, file_to_loc, file_to_loc_str,
+        loc_resolution, focus_fn, format_loc, unzip
+        )
 
 
 def collocates(items, spread=3, bidir=True):
@@ -34,10 +39,55 @@ def collocates(items, spread=3, bidir=True):
                 yield (y, x)
 
 
+def simple_output(dirname, files, index, freqs):
+    """Output."""
+    headers = ['token'] + [file_to_loc_str(filename) for filename in files]
+
+    for letter, indexes in index.items():
+        output = '{}-{}-colls.csv'.format(dirname, letter)
+        print('{} => {}'.format(dirname, output))
+        with open(output, 'w') as fout:
+            writer = csv.writer(fout)
+            writer.writerow(headers)
+            writer.writerows(
+                [word] + list(freqs[:, i])
+                for i, word in indexes
+                )
+
+
+def break_output(dirname, files, index, freqs):
+    """Subdivide the output by the next to last item."""
+    locs = [(i, file_to_loc(filename)) for (i, filename) in enumerate(files)]
+    loc_level = max(loc_resolution(loc) for _, loc in locs)
+    locs.sort(key=operator.itemgetter(1))
+
+    focus = focus_fn(loc_level)
+    group_key = lambda pair: focus(pair[1])
+    for place, focused_pairs in itertools.groupby(locs, group_key):
+        focused_i, focused_locs = unzip(focused_pairs)
+        focused = freqs[focused_i,]
+
+        headers = ['token'] + [format_loc(loc) for loc in focused_locs]
+        for letter, indexes in index.items():
+            output = '{}-{}-{}-colls.csv'.format(
+                dirname,
+                '.'.join(str(n) for n in place),
+                letter,
+                )
+
+            print('{} ({}) => {}'.format(dirname, place, output))
+            with open(output, 'w') as fout:
+                writer = csv.writer(fout)
+                writer.writerow(headers)
+                writer.writerows(
+                    [word] + list(focused[:, i])
+                    for i, word in indexes
+                    )
+
+
 def main():
     for dirname in CHUNKS:
         files, content = corpus_files_contents(dirname)
-        headers = ['token'] + [file_to_loc(filename) for filename in files]
 
         counts = CountVectorizer()
         tokenizer = counts.build_analyzer()
@@ -54,16 +104,10 @@ def main():
         for i, word in enumerate(counts.get_feature_names()):
             index[word[0]].append((i, word))
 
-        for letter, indexes in index.items():
-            output = '{}-{}-colls.csv'.format(dirname, letter)
-            print('{} => {}'.format(dirname, output))
-            with open(output, 'w') as fout:
-                writer = csv.writer(fout)
-                writer.writerow(headers)
-                writer.writerows(
-                    [word] + list(freqs[:, i])
-                    for i, word in indexes
-                    )
+        if len(files) >= 50:
+            break_output(dirname, files, index, freqs)
+        else:
+            simple_output(dirname, files, index, freqs)
 
 
 if __name__ == '__main__':

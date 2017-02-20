@@ -26,23 +26,65 @@ def read_corpus(dirname):
 
 
 def file_to_loc(filename):
-    """Extracts the location from a filename."""
-    return '.'.join(p.lstrip('0') for p in filename.split('.')[0].split('-')[1:])
+    """Extracts the location from a filename.
+
+    >>> file_to_loc('full/pg145.txt')
+    Location(book=None, chapter=None, para=None)
+    >>> file_to_loc('books/book-03.txt')
+    Location(book=3, chapter=None, para=None)
+    >>> file_to_loc('chapters/chapter-07-02.txt')
+    Location(book=7, chapter=2, para=None)
+    >>> file_to_loc('paragraphs/paragraph-04-05-0029.txt')
+    Location(book=4, chapter=5, para=29)
+    """
+    parts = filename.split('.')[0].split('-')[1:]
+    return read_loc('.'.join(parts)) if parts else Location(None, None, None)
+
+
+def file_to_loc_str(filename):
+    """Extracts the location from a filename as a string."""
+    return format_loc(file_to_loc(filename))
 
 
 def corpus_files_contents(dirname):
     """Return a tuple listing the files in the corpus in the first element and
     the contents of the corpus in the second."""
-    files = []
-    content = []
-    for filename, text in read_corpus(dirname):
-        files.append(filename)
-        content.append(text)
-    return (files, content)
+    return unzip(read_corpus(dirname))
+
+
+def unzip(pairs):
+    """Take an iterator of pairs and returns a pair of lists."""
+    firsts = []
+    seconds = []
+    for a, b in iter(pairs):
+        firsts.append(a)
+        seconds.append(b)
+    return (firsts, seconds)
 
 
 def format_loc(loc):
     return '.'.join(str(part) for part in loc if part is not None)
+
+
+def read_loc(loc_str):
+    args = ([int(part) for part in loc_str.split('.')] + ([None] * 3))[:3]
+    return Location._make(args)
+
+
+def loc_resolution(loc):
+    """Return the number of levels that this Location represents."""
+    if loc.chapter is None:
+        return 1
+    elif loc.para is None:
+        return 2
+    else:
+        return 3
+
+
+def focus_fn(resolution):
+    """Return a function that slices a Location to the given resolution."""
+    focus = resolution - 1
+    return lambda loc: loc[:focus]
 
 
 def book_start(line):
