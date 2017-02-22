@@ -11,7 +11,6 @@ import os
 import re
 
 from split_text import FULL, TEXT, read_book, locate_lines
-# , file_to_loc, file_to_loc_str, loc_resolution, focus_fn, format_loc, unzip
 
 
 CONTEXT = 30
