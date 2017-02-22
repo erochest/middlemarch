@@ -27,7 +27,7 @@ def normalize(text):
 def tokenize(text):
     """Tokenizes the text and iterate over the tokens and spans."""
     return [((m.start(0), m.end(0)), m.group(0).lower())
-            for m in re.finditer(r'\w+', text)]
+            for m in re.finditer(r'\w+', text.replace('_', ' '))]
 
 
 class KWIC(namedtuple('KWIC', ('loc', 'prefix', 'token', 'postfix'))):
@@ -35,7 +35,7 @@ class KWIC(namedtuple('KWIC', ('loc', 'prefix', 'token', 'postfix'))):
     __slots__ = ()
 
     def __str__(self):
-        return '[{!s:>9}] {:>30} {:^20} {:<30}'.format(
+        return '[{!s:>9}] {:>30} {} {:<30}'.format(
             self.loc, self.prefix, self.token, self.postfix,
             )
 
