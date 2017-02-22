@@ -15,7 +15,12 @@ PARAS = 'paragraphs'
 CHUNKS = (FULL, BOOKS, CHAPTERS, PARAS)
 
 
-Location = namedtuple('Location', ('book', 'chapter', 'para'))
+class Location(namedtuple('Location', ('book', 'chapter', 'para'))):
+    """A location in the book."""
+    __slots__ = ()
+
+    def __str__(self):
+        return '.'.join(str(part) for part in self if part is not None)
 
 
 def read_corpus(dirname):
