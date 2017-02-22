@@ -103,14 +103,15 @@ def main():
         para = normalize(' '.join(line for _, line in para_pairs))
         tokens = tokenize(para)
 
-        for (i, (_, token)) in enumerate(tokens):
+        for (i, ((start, end), token)) in enumerate(tokens):
             if token in stopwords:
                 continue
 
             prefix = get_prefix(i, tokens, para, CONTEXT)
             suffix = get_suffix(i, tokens, para, CONTEXT)
 
-            index[token].append(KWIC(loc, prefix, token, suffix))
+            kwic = KWIC(loc, prefix, para[start:end], suffix)
+            index[token].append(kwic)
 
     write_kwics(OUTPUT_DIR, index)
 
