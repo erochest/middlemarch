@@ -62,14 +62,18 @@ def main():
             prefix = ''
             while h >= 0 and len(prefix) < CONTEXT:
                 (pre_start, _), _ = tokens[h]
-                prefix = para[pre_start:start]
+                if start - pre_start > CONTEXT:
+                    break
+                prefix = para[pre_start:start].strip()
                 h -= 1
 
             j = i + 1
             suffix = ''
             while j < len(tokens) and len(suffix) < CONTEXT:
                 (_, post_end), _ = tokens[j]
-                suffix = para[end:post_end]
+                if post_end - end > CONTEXT:
+                    break
+                suffix = para[end:post_end].strip()
                 j += 1
 
             index[token].append(KWIC(loc, prefix, token, suffix))
